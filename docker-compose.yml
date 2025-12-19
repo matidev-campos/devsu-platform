@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: devsu-postgres
+    environment:
+      POSTGRES_USER: devsu
+      POSTGRES_PASSWORD: devsu
+      POSTGRES_DB: devsu
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - devsu-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: devsu-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - devsu-net
+
+  client-service:
+    build:
+      context: ./client-service
+    container_name: client-service
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devsu
+      SPRING_DATASOURCE_USERNAME: devsu
+      SPRING_DATASOURCE_PASSWORD: devsu
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+    networks:
+      - devsu-net
+
+  account-service:
+    build:
+      context: ./account-service
+    container_name: account-service
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devsu
+      SPRING_DATASOURCE_USERNAME: devsu
+      SPRING_DATASOURCE_PASSWORD: devsu
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+    networks:
+      - devsu-net
+
+volumes:
+  postgres_data:
+
+networks:
+  devsu-net:

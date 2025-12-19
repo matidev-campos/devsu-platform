@@ -1,0 +1,6 @@
+[submodule "client-service"]
+	path = client-service
+	url = https://github.com/matidev-campos/client-service.git
+[submodule "account-service"]
+	path = account-service
+	url = https://github.com/matidev-campos/account-service.git
